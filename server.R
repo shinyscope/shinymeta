@@ -1,3 +1,6 @@
+library(shiny)
+library(tidyverse)
+library(DT)
 library(shinymeta)
 
 shinyServer(function(input, output, session) {
@@ -19,6 +22,10 @@ shinyServer(function(input, output, session) {
       mutate(Score = round(Raw_Points/Max_Points*100,2))
     # mutate(mean = mean(c_across(3:ncol(..(data())))))
   })
+  
+  grading <- metaReactive({
+   (..(input$grading_policy) == "Equally Weighted")
+  })
   # Output data table with assignment scores
   output$table <- metaRender(renderDataTable, {
     ..(means())
@@ -30,7 +37,7 @@ shinyServer(function(input, output, session) {
     colnames(test) <- "Names"
     table <- data.frame(Names = test,
                         Grades = 0) #table with each unique student
-    if (input$grading_policy == "Equally Weighted"){
+    if (..(grading())){
       table <- ..(means()) |>
         group_by(name) |>
         summarize(Grade = mean(Score)) #grades with equal weights of each assignment
