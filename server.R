@@ -22,9 +22,8 @@ shinyServer(function(input, output, session) {
       mutate(Score = round(Raw_Points/Max_Points*100,2))
     # mutate(mean = mean(c_across(3:ncol(..(data())))))
   })
-  
   grading <- metaReactive({
-   (..(input$grading_policy) == "Equally Weighted")
+    (..(input$grading_policy) == "Equally Weighted")
   })
   # Output data table with assignment scores
   output$table <- metaRender(renderDataTable, {
