@@ -29,7 +29,7 @@ shinyServer(function(input, output, session) {
   student_grades <- metaReactive({
       ..(assignment_scores()) %>%
         group_by(name) %>%
-        summarize(Grade = ..(switch(input$grading_policy,
+        summarize(Grade = !!..(switch(input$grading_policy,
                                     "Equally Weighted" = rlang::expr(mean(Score)),
                                     "Weighted by Points" = rlang::expr(sum(Raw_Points)/sum(Max_Points)))))
   })
