@@ -3,6 +3,9 @@ library(tidyverse)
 library(DT)
 library(shinymeta)
 
+HSLocation <- "HelperScripts/"
+source(paste0(HSLocation, "Functions.R"))
+
 shinyServer(function(input, output, session) {
   # reads uploaded file and calculates scores for each assignment
   assignment_scores <- metaReactive2({
@@ -61,5 +64,38 @@ shinyServer(function(input, output, session) {
       report <- output$code()
       buildScriptBundle(report, file)
     })
+  
+  
+  
+  cat <- reactiveValues(table = cat_table <- data.frame(matrix(ncol = 7, nrow = 1)) %>%
+                          rename(Categories = "X1", Weights = "X2", Assignments_Included = "X3", Drops = "X4", Grading_Policy = "X5", Clobber_Policy = "X6", Late_Policy = "X7"))
+  
+  output$cat <- renderTable(cat$table)
+  
+  observeEvent(input$save,{
+    inputs <- c(input$cat_name, input$weight, input$num_drops,input$grading_policy, input$clobber_boolean, input$late_boolean)
+    cat$table <- updateCatTable(cat$table, input$cat_num, inputs)
+  })
+  
+  observeEvent(input$new,{
+    cat$table[ nrow(cat$table) + 1 , ] <- NA
+    updateNumericInput(session, "cat_num", value = nrow(cat$table))
+  })
+  
+  observeEvent(input$delete,{
+    cat$table <- cat$table[-input$cat_num,]
+  })
+  
+  observeEvent(input$cat_num,{
+    n <- input$cat_num
+    updateTextInput(session, "cat_name", value = cat$table[n, 1])
+    shinyWidgets::updateAutonumericInput(session, "weight", value = cat$table[n, 2])
+    updateNumericInput(session, "num_drops", value = cat$table[n, 4])
+    
+  })
+  
+  observe({
+    updateNumericInput(session, "cat_num", max = nrow(cat$table))
+  })
 }
 )
